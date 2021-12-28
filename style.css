@@ -1,6 +1,9 @@
 html,body {
   height: 100%;
   background: red;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
 }
 
 .col {
