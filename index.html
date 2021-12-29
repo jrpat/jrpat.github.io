@@ -71,11 +71,11 @@ body {
   <body>
     <div class=col>
       <h1>M <b id=p1>0</b></h1>
-      <textarea id=t1 onchange="calc(p1,t1)" inputmode=tel></textarea>
+      <textarea id=t1 oninput="calc(p1,t1)" onblur="nl(t1)" inputmode=tel></textarea>
     </div>
     <div class=col>
       <h1>J <b id=p2>0</b></h1>
-      <textarea id=t2 onchange="calc(p2,t2)" inputmode=tel></textarea>
+      <textarea id=t2 oninput="calc(p2,t2)" onblur="nl(t2)" inputmode=tel></textarea>
     </div>
 
     <div id=ctrl>
@@ -94,7 +94,6 @@ function calc(p, t) {
   t.value = t.value.replace('#', '-').replace(';', '\n')
   p.innerText = '' + t.value.split('\n').reduce(sum, 0)
   localStorage.setItem(t.id, t.value)
-  t.value += '\n'
 }
 
 function cls() {
@@ -102,6 +101,10 @@ function cls() {
     t1.value = '' ; calc(p1, t1)
     t2.value = '' ; calc(p2, t2)
   }
+}
+
+function nl(t) {
+
 }
 
 load(p1, t1)
