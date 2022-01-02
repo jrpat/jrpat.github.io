@@ -3,7 +3,6 @@
   <head>
     <title>Scorecard</title>
     <meta name="viewport" content="initial-scale=1, maximum-scale=1">
-<!--    <link rel=stylesheet href="style.css">-->
 <style>
 
 * {
@@ -66,6 +65,11 @@ body {
   background: #eee;
 }
 
+button {
+  margin: 0 0.5em;
+  display: inline-block;
+}
+
 </style>
   </head>
   <body>
@@ -80,6 +84,7 @@ body {
 
     <div id=ctrl>
       <button onclick="cls()">&#128128;</button>
+      <button onclick="rev(t1);rev(t2)">&#8644;</button>
     </div>
 
 <script>
@@ -90,10 +95,14 @@ function load(p, t) {
   calc(p, t)
 }
 
+function save(t) {
+  localStorage.setItem(t.id, t.value)
+}
+
 function calc(p, t) {
   t.value = t.value.replace('#', '-').replace(';', '\n')
   p.innerText = '' + t.value.split('\n').reduce(sum, 0)
-  localStorage.setItem(t.id, t.value)
+  save(t)
 }
 
 function cls() {
@@ -104,7 +113,12 @@ function cls() {
 }
 
 function nl(t) {
-  t.value += '\n'
+  t.value = '\n' + t.value
+}
+
+function rev(t) {
+  t.value = t.value.split('\n').reverse().join('\n')
+  save(t)
 }
 
 load(p1, t1)
