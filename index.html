@@ -43,7 +43,22 @@ body {
   padding: 0.25em;
 }
 
-.col textarea {
+.col form {
+  flex: 0;
+  display: flex;
+  flex-direction: row;
+  padding: 5px;
+}
+
+input[type=text] {
+  flex: 1;
+}
+
+input[type="submit"] {
+  flex: 0;
+}
+
+.col pre {
   flex: 1;
   font: 1.25rem monospace;
   border: none;
@@ -51,6 +66,7 @@ body {
   padding: 0.5em;
   line-height: 1.4em;
   width: 100%;
+  overflow-y: scroll;
 }
 
 #ctrl {
@@ -75,50 +91,59 @@ button {
   <body>
     <div class=col>
       <h1>M <b id=p1>0</b></h1>
-      <textarea id=t1 oninput="calc(p1,t1)" onblur="nl(t1)" inputmode=tel></textarea>
+      <form onsubmit="return rec(i1,p1,t1)">
+        <input id=i1 oninput="input(i1)" inputmode=tel type=text />
+        <input type=submit value=&#10003; />
+      </form>
+      <pre id=t1></pre>
     </div>
     <div class=col>
       <h1>J <b id=p2>0</b></h1>
-      <textarea id=t2 oninput="calc(p2,t2)" onblur="nl(t2)" inputmode=tel></textarea>
+      <form onsubmit="return rec(i2,p2,t2)">
+        <input id=i2 oninput="input(i2)" inputmode=tel type=text />
+        <input type=submit value=&#10003; />
+      </form>
+      <pre id=t2></pre>
     </div>
 
     <div id=ctrl>
       <button onclick="cls()">&#128128;</button>
-<!--      <button onclick="rev(t1);rev(t2)">&#8644;</button>-->
     </div>
 
 <script>
 sum = (tot, n) => tot + (isNaN(eval(n)) ? 0 : eval(n))
 
 function load(p, t) {
-  t.value = localStorage.getItem(t.id)
+  t.innerText = localStorage.getItem(t.id) || ''
   calc(p, t)
 }
 
 function save(t) {
-  localStorage.setItem(t.id, t.value)
+  localStorage.setItem(t.id, t.innerText)
+}
+
+function input(i) {
+  i.value = i.value.replace('#', '-')
+}
+
+function rec(i, p, t) {
+  t.innerText = i.value + '\n' + t.innerText
+  i.value = ''
+  calc(p, t)
+  save(t)
+  return false
 }
 
 function calc(p, t) {
-  t.value = t.value.replace('#', '-').replace(';', '\n')
-  p.innerText = '' + t.value.split('\n').reduce(sum, 0)
-  save(t)
+  p.innerText = '' + t.innerText.split('\n').reduce(sum, 0)
 }
 
 function cls() {
   if (confirm('Really clear?')) {
-    t1.value = '' ; calc(p1, t1)
-    t2.value = '' ; calc(p2, t2)
+    localStorage.clear()
+    window.scrollTo(0,0)
+    location.reload()
   }
-}
-
-function nl(t) {
-  t.value = '\n' + t.value
-}
-
-function rev(t) {
-  t.value = t.value.split('\n').reverse().join('\n')
-  save(t)
 }
 
 load(p1, t1)
