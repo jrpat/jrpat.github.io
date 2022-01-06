@@ -40,7 +40,8 @@ body {
   font-size: 1.5rem;
   background: rebeccapurple;
   color: #fff;
-  padding: 0.25em;
+  padding: 0 0.25em;
+  line-height: 40px;
 }
 
 .col form {
@@ -86,28 +87,42 @@ button {
   display: inline-block;
 }
 
+#edit {
+  position: fixed;
+  padding: 1em;
+  top: 0;
+  width: 100%;
+  background: red;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  display: none;
+  height: 40px;
+}
+
+#edit.show {
+  display: flex;
+}
+
 </style>
   </head>
   <body>
     <div class=col>
-      <h1>M <b id=p1>0</b></h1>
-      <form onsubmit="return rec(i1,p1,t1)">
-        <input id=i1 oninput="input(i1)" inputmode=tel type=text />
-        <input type=submit value=&#10003; />
-      </form>
+      <h1>M <b id=p1>0</b><button onclick="add(p1,t1)">+</button></h1>
       <pre id=t1></pre>
     </div>
     <div class=col>
-      <h1>J <b id=p2>0</b></h1>
-      <form onsubmit="return rec(i2,p2,t2)">
-        <input id=i2 oninput="input(i2)" inputmode=tel type=text />
-        <input type=submit value=&#10003; />
-      </form>
+      <h1>J <b id=p2>0</b><button onclick="add(p2,t2)">+</button></h1>
       <pre id=t2></pre>
     </div>
 
     <div id=ctrl>
       <button onclick="cls()">&#128128;</button>
+    </div>
+
+    <div id=edit>
+      <button onclick="del()">DELETE</button>
     </div>
 
 <script>
@@ -122,13 +137,11 @@ function save(t) {
   localStorage.setItem(t.id, t.innerText)
 }
 
-function input(i) {
-  i.value = i.value.replace('#', '-')
-}
-
-function rec(i, p, t) {
-  t.innerText = i.value + '\n' + t.innerText
-  i.value = ''
+function add(p, t) {
+  let str = prompt("Add score (use # for minus)")
+  if (str == null) return;
+  str = str.replace(/#/g, '-').replace(/[^\d-]/g, '')
+  t.innerText = str.replace(/#/g, '-') + '\n' + t.innerText
   calc(p, t)
   save(t)
   return false
@@ -144,6 +157,38 @@ function cls() {
     window.scrollTo(0,0)
     location.reload()
   }
+}
+
+document.addEventListener('selectionchange', e => {
+  let sel = getSelection()
+  let n = sel.anchorNode
+  if (n && n.parentElement.tagName == 'PRE') {
+    if (sel.type == 'Range') {
+      edit.classList.add('show')
+      window.sel = sel
+      return
+    }
+  }
+  unsel()
+})
+
+function unsel() {
+  edit.classList.remove('show')
+  window.sel = null
+}
+
+function del() {
+  if (!sel) return;
+  if (!confirm("Really delete?\n\n" + sel.toString())) return;
+  let el = sel.anchorNode
+  let par = el.parentNode
+  try { par.removeChild(el.nextSibling) } catch {}
+  par.removeChild(el)
+  unsel()
+  getSelection().removeAllRanges()
+  calc(p1,t1)
+  calc(p2,t2)
+  save(par)
 }
 
 load(p1, t1)
