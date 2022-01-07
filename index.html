@@ -51,7 +51,7 @@ body {
   padding: 5px;
 }
 
-input[type=text] {
+input[type=tel] {
   flex: 1;
 }
 
@@ -59,7 +59,7 @@ input[type="submit"] {
   flex: 0;
 }
 
-.col pre {
+#t1, #t2 {
   flex: 1;
   font: 1.25rem monospace;
   border: none;
@@ -68,6 +68,17 @@ input[type="submit"] {
   line-height: 1.4em;
   width: 100%;
   overflow-y: scroll;
+}
+
+textarea {
+  color: green;
+}
+
+textarea:disabled {
+  color: black;
+  -webkit-text-fill-color: black;
+  background: #fff;
+  opacity: 1;
 }
 
 #ctrl {
@@ -92,103 +103,85 @@ button {
   padding: 1em;
   top: 0;
   width: 100%;
-  background: red;
+  background: #339966;
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
-  display: none;
   height: 40px;
+  border: none;
 }
 
-#edit.show {
-  display: flex;
+#edit:disabled {
+  display: none;
 }
 
 </style>
   </head>
   <body>
     <div class=col>
-      <h1>M <b id=p1>0</b><button onclick="add(p1,t1)">+</button></h1>
-      <pre id=t1></pre>
+      <h1>M <b id=p1>0</b></h1>
+      <form onsubmit="return add(i1, p1, t1)">
+        <input id=i1 oninput="input(i1)" type=tel />
+        <input type=submit value=&#10003;>
+      </form>
+      <textarea id=t1 disabled></textarea>
     </div>
     <div class=col>
-      <h1>J <b id=p2>0</b><button onclick="add(p2,t2)">+</button></h1>
-      <pre id=t2></pre>
+      <h1>J <b id=p2>0</b></h1>
+      <form onsubmit="return add(i2, p2, t2)">
+        <input id=i2 oninput="input(i2)" type=tel />
+        <input type=submit value=&#10003;>
+      </form>
+      <textarea id=t2 disabled></textarea>
     </div>
 
     <div id=ctrl>
-      <button onclick="cls()">&#128128;</button>
+      <button onclick="mod(1)">&#128221;</button>
     </div>
 
-    <div id=edit>
-      <button onclick="del()">DELETE</button>
-    </div>
+    <fieldset id=edit disabled>
+      <button onclick="mod(0)">SAVE</button>
+    </fieldset>
 
 <script>
 sum = (tot, n) => tot + (isNaN(eval(n)) ? 0 : eval(n))
 
+function calc(p, t) {
+  p.innerText = '' + t.value.split('\n').reduce(sum, 0)
+}
+
 function load(p, t) {
-  t.innerText = localStorage.getItem(t.id) || ''
+  t.value = localStorage.getItem(t.id) || ''
   calc(p, t)
 }
 
 function save(t) {
-  localStorage.setItem(t.id, t.innerText)
+  localStorage.setItem(t.id, t.value)
 }
 
-function add(p, t) {
-  let str = prompt("Add score (use # for minus)")
-  if (str == null) return;
-  str = str.replace(/#/g, '-').replace(/[^\d-]/g, '')
-  t.innerText = str.replace(/#/g, '-') + '\n' + t.innerText
+function add(i, p, t) {
+  t.value = i.value + '\n' + t.value
+  i.value = ''
   calc(p, t)
   save(t)
   return false
 }
 
-function calc(p, t) {
-  p.innerText = '' + t.innerText.split('\n').reduce(sum, 0)
+function input(i) {
+  i.value = i.value.replace(/#/g, '-')
 }
 
-function cls() {
-  if (confirm('Really clear?')) {
-    localStorage.clear()
-    window.scrollTo(0,0)
-    location.reload()
+function mod(i) {
+  let els = [edit, t1, t2]
+  if (i) {
+    els.forEach(e => {e.disabled=false})
+  } else {
+    els.forEach(e => {e.disabled=true})
+    save(t1) ; save(t2)
+    calc(p1,t1) ; calc(p2,t2)
   }
-}
-
-document.addEventListener('selectionchange', e => {
-  let sel = getSelection()
-  let n = sel.anchorNode
-  if (n && n.parentElement.tagName == 'PRE') {
-    if (sel.type == 'Range') {
-      edit.classList.add('show')
-      window.sel = sel
-      return
-    }
-  }
-  unsel()
-})
-
-function unsel() {
-  edit.classList.remove('show')
-  window.sel = null
-}
-
-function del() {
-  if (!sel) return;
-  if (!confirm("Really delete?\n\n" + sel.toString())) return;
-  let el = sel.anchorNode
-  let par = el.parentNode
-  try { par.removeChild(el.nextSibling) } catch {}
-  par.removeChild(el)
-  unsel()
-  getSelection().removeAllRanges()
-  calc(p1,t1)
-  calc(p2,t2)
-  save(par)
+  window.scrollTo(0,0)
 }
 
 load(p1, t1)
