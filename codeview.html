@@ -4,9 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>File Viewer</title>
-  <link rel="stylesheet" href="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/styles/default.min.css">
-  <script src="https://unpkg.com/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
   <style>
+    html { color-scheme: light dark; }
     body {
       margin: 0;
       padding: 0;
@@ -20,8 +19,25 @@
       box-sizing: border-box;
       overflow: auto;
     }
-    pre {
-      background-color: #f4f4f4;
+    .file-list {
+      margin-top: 20px;
+    }
+    .file-list h3 {
+      margin-bottom: 10px;
+    }
+    .file-list ul {
+      list-style: none;
+      padding: 0;
+    }
+    .file-list ul li {
+      margin: 5px 0;
+    }
+    .file-list ul li a {
+      text-decoration: none;
+      color: #007BFF;
+    }
+    .file-list ul li a:hover {
+      text-decoration: underline;
     }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
@@ -31,8 +47,9 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const hash = location.hash.slice(1); // Get the hash without '#'
+
       if (!hash) {
-        // No hash in URL, display file input
+        // No hash in URL, display file input and list of stored files
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.txt'; // Accept text files
@@ -46,6 +63,27 @@
           }
         });
         document.body.appendChild(input);
+
+        // List all files in localStorage
+        const fileListContainer = document.createElement('div');
+        fileListContainer.classList.add('file-list');
+        const heading = document.createElement('h3');
+        heading.textContent = 'Stored Files:';
+        fileListContainer.appendChild(heading);
+
+        const fileList = document.createElement('ul');
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          const fileLink = document.createElement('a');
+          fileLink.href = `#${key}`;
+          fileLink.textContent = key;
+          const listItem = document.createElement('li');
+          listItem.appendChild(fileLink);
+          fileList.appendChild(listItem);
+        }
+
+        fileListContainer.appendChild(fileList);
+        document.body.appendChild(fileListContainer);
       } else {
         // Hash exists, retrieve and display file content
         const content = localStorage.getItem(hash);
