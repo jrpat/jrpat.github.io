@@ -84,6 +84,9 @@
 
         fileListContainer.appendChild(fileList);
         document.body.appendChild(fileListContainer);
+        window.addEventListener('hashchange', () => {
+          location.reload();
+        });
       } else {
         // Hash exists, retrieve and display file content
         const content = localStorage.getItem(hash);
